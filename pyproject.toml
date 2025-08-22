@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iblpt"
+version = "0.1.0"
+description = "IBL and PT-IBL simulation, fitting, and plotting"
+requires-python = ">=3.9"
+dependencies = [
+  "numpy",
+  "pandas",
+  "scipy",
+  "matplotlib",
+  "PyYAML",
+  "tqdm",
+]
+
+[project.urls]
+Homepage = "https://example.com"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[project.scripts]
+iblpt-fit = "scripts.fit:main"
+iblpt-evaluate = "scripts.evaluate:main"
+iblpt-plot = "scripts.plot_r_rate:main"
+
+

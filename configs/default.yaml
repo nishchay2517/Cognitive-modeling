@@ -1,0 +1,20 @@
+data:
+  estimation: repeated/data/60estimationset.dat
+  competition: repeated/data/60competitionset.dat
+simulation:
+  trials: 100
+  agents: 5
+  seed: 42
+metrics:
+  r_weight: 0.9
+opt:
+  ibl_bounds: [[0.01,10],[0.01,10],[0.0,1.0]]
+  pt_extra_bounds: [[0.2,1.0],[0.2,1.0],[0.1,5.0]]
+  maxiter: 15
+  popsize: 8
+  tol: 1e-2
+  workers: -1
+output:
+  dir: outputs
+
+
