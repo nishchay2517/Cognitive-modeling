@@ -9,18 +9,18 @@ src/iblpt/
   data/             # dataset loader
   human/            # human reference time-series arrays
   simulate.py       # eval_ts
-  metrics.py        # msd, corr, aic
-  optimize.py       # fit_ibl, fit_pt
+  metrics.py        # msd, corr, aic, summarize
+  optimize.py       # fit_ibl, fit_pt, callbacks
   plotting.py       # plot_r_rate_curves
-  config.py         # YAML config loader
-configs/
-  default.yaml      # data paths, trials, agents, bounds, output dir
+  config.py         # configuration parameters
 scripts/
-  fit.py            # fit parameters via DE
-  evaluate.py       # compute MSD/Corr/AIC
-  plot_r_rate.py    # plot R-rate curves
-outputs/            # results and figures
-repeated/data/      # existing datasets (can be moved later)
+  main_optimization.py  # main optimization pipeline
+  cli.py               # command-line interface
+  fit.py               # fit parameters via DE
+  evaluate.py          # compute MSD/Corr/AIC
+  plot_r_rate.py       # plot R-rate curves
+outputs/               # results and figures
+repeated/data/         # existing datasets (can be moved later)
 ```
 
 ## Installation
@@ -29,9 +29,26 @@ pip install -e .
 ```
 
 ## Configuration
-Edit `configs/default.yaml` to set dataset paths, trials, agents, optimization bounds, and output directory.
+Edit `src/iblpt/config.py` to set dataset paths, trials, agents, optimization bounds, and output directory.
 
 ## Commands
+
+### New Refactored Interface
+The code has been refactored for better organization and easier use:
+
+```bash
+# Main optimization pipeline
+python scripts/main_optimization.py
+
+# Command-line interface (recommended)
+python scripts/cli.py pt                    # Optimize PT+IBL model
+python scripts/cli.py ibl                   # Optimize IBL model
+python scripts/cli.py ibl --compare         # Compare with default parameters
+python scripts/cli.py pt --output-dir outputs/  # Custom output directory
+```
+
+### Legacy Scripts
+The original scripts are still available:
 - Fit parameters:
 ```bash
 python scripts/fit.py --config configs/default.yaml --model pt

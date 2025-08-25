@@ -1,61 +1,51 @@
-from __future__ import annotations
+"""
+Configuration module for IBL and PT+IBL models.
+"""
 
-from dataclasses import dataclass
-from pathlib import Path
-import yaml
+# Optimization parameters
+OPTIMIZATION_CONFIG = {
+    'maxiter': 15,
+    'popsize': 8,
+    'updating': 'deferred',
+    'workers': -1,
+    'tol': 1e-2
+}
 
+# Model parameter bounds
+PARAMETER_BOUNDS = {
+    'ibl': [(0.01, 10), (0.01, 10), (0.0, 1.0)],  # decay, noise, inertia
+    'pt': [(0.01, 10), (0.01, 10), (0.0, 1.0),     # decay, noise, inertia
+           (0.2, 1.0), (0.2, 1.0), (0.1, 5.0)]     # alpha, beta, lambda
+}
 
-@dataclass
-class Paths:
-    estimation: str
-    competition: str
+# Default parameters
+DEFAULT_PARAMETERS = {
+    'ibl': (5.27, 1.46, 0.09),
+    'pt': None  # Will be optimized
+}
 
+# Pre-optimized parameters (from previous runs)
+PRE_OPTIMIZED_PARAMETERS = {
+    'ibl': [4.59856917, 0.04554824, 0.01635943]
+}
 
-@dataclass
-class Simulation:
-    trials: int = 100
-    agents: int = 5
-    seed: int | None = None
+# Simulation parameters
+SIMULATION_CONFIG = {
+    'N': 100,      # number of trials
+    'agents': 5,   # Monte Carlo replications per problem
+    'plot_agents': 20  # agents for plotting
+}
 
+# Data paths
+DATA_PATHS = {
+    'estimation': 'repeated/data/60estimationset.dat',
+    'competition': 'repeated/data/60competitionset.dat'
+}
 
-@dataclass
-class MetricsCfg:
-    r_weight: float = 0.9
+# Output paths
+OUTPUT_PATHS = {
+    'plot': 'IBLPT_vs_human.png'
+}
 
-
-@dataclass
-class OptCfg:
-    ibl_bounds: list[list[float]] = None
-    pt_extra_bounds: list[list[float]] = None
-    maxiter: int = 15
-    popsize: int = 8
-    tol: float = 1e-2
-    workers: int = -1
-
-
-@dataclass
-class OutputCfg:
-    dir: str = "outputs"
-
-
-@dataclass
-class Config:
-    data: Paths
-    simulation: Simulation
-    metrics: MetricsCfg
-    opt: OptCfg
-    output: OutputCfg
-
-
-def load_config(path: str | Path) -> Config:
-    with open(path, 'r') as f:
-        raw = yaml.safe_load(f)
-    return Config(
-        data=Paths(**raw['data']),
-        simulation=Simulation(**raw.get('simulation', {})),
-        metrics=MetricsCfg(**raw.get('metrics', {})),
-        opt=OptCfg(**raw.get('opt', {})),
-        output=OutputCfg(**raw.get('output', {})),
-    )
 
 
