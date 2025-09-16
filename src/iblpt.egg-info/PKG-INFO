@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: iblpt
+Version: 0.1.0
+Summary: IBL and PT-IBL simulation, fitting, and plotting
+Project-URL: Homepage, https://example.com
+Requires-Python: >=3.9
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: scipy
+Requires-Dist: matplotlib
+Requires-Dist: PyYAML
+Requires-Dist: tqdm

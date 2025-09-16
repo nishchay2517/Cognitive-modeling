@@ -1,0 +1,4 @@
+[console_scripts]
+iblpt-evaluate = scripts.evaluate:main
+iblpt-fit = scripts.fit:main
+iblpt-plot = scripts.plot_r_rate:main
