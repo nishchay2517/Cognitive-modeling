@@ -6,7 +6,7 @@ from functools import partial
 
 from iblpt.simulate import eval_ts
 from iblpt.metrics import msd
-from iblpt.human.metrics import human_r_ts_est, human_a_ts_est
+from iblpt.config import OPTIMIZATION_CONFIG
 
 
 def _ibl_objective(x, dataset, N, agents, r_weight):
@@ -21,25 +21,37 @@ def _pt_objective(x, dataset, N, agents, r_weight):
     return msd(r_ts, human_r_ts_est)*r_weight + msd(a_ts, human_a_ts_est)*(1-r_weight)
 
 
-def fit_ibl(params0_bounds, dataset, N=100, agents=5, r_weight=0.9, callback=None, workers=1):
+def fit_ibl(params0_bounds, dataset, N=100, agents=5, r_weight=0.9, callback=None, workers=None):
     """Fit IBL model parameters using differential evolution."""
     objective = partial(_ibl_objective, dataset=dataset, N=N, agents=agents, r_weight=r_weight)
     
-    res = differential_evolution(
-        objective, params0_bounds, maxiter=15, popsize=8,
-        updating='deferred', workers=workers, tol=1e-2, callback=callback
+    de_kwargs = dict(
+        maxiter=OPTIMIZATION_CONFIG.get('maxiter', 15),
+        popsize=OPTIMIZATION_CONFIG.get('popsize', 8),
+        updating=OPTIMIZATION_CONFIG.get('updating', 'deferred'),
+        workers=OPTIMIZATION_CONFIG.get('workers', 1) if workers is None else workers,
+        tol=OPTIMIZATION_CONFIG.get('tol', 1e-2),
+        callback=callback,
     )
+
+    res = differential_evolution(objective, params0_bounds, **de_kwargs)
     return res
 
 
-def fit_pt(params0_bounds, dataset, N=100, agents=5, r_weight=0.5, callback=None, workers=1):
+def fit_pt(params0_bounds, dataset, N=100, agents=5, r_weight=0.5, callback=None, workers=None):
     """Fit PT+IBL model parameters using differential evolution."""
     objective = partial(_pt_objective, dataset=dataset, N=N, agents=agents, r_weight=r_weight)
     
-    res = differential_evolution(
-        objective, params0_bounds, maxiter=15, popsize=8,
-        updating='deferred', workers=workers, tol=1e-2, callback=callback
+    de_kwargs = dict(
+        maxiter=OPTIMIZATION_CONFIG.get('maxiter', 15),
+        popsize=OPTIMIZATION_CONFIG.get('popsize', 8),
+        updating=OPTIMIZATION_CONFIG.get('updating', 'deferred'),
+        workers=OPTIMIZATION_CONFIG.get('workers', 1) if workers is None else workers,
+        tol=OPTIMIZATION_CONFIG.get('tol', 1e-2),
+        callback=callback,
     )
+
+    res = differential_evolution(objective, params0_bounds, **de_kwargs)
     return res
 
 

@@ -48,4 +48,24 @@ OUTPUT_PATHS = {
 }
 
 
+# --- Config loader for YAML files used by scripts/evaluate.py ---
+def load_config(path):
+    """Load a YAML config and return a simple dot-access object.
+    Supports sections used in configs/default.yaml (data, simulation, metrics, opt, output).
+    """
+    import yaml
+    from types import SimpleNamespace
+
+    def to_ns(obj):
+        if isinstance(obj, dict):
+            return SimpleNamespace(**{k: to_ns(v) for k, v in obj.items()})
+        if isinstance(obj, list):
+            return [to_ns(v) for v in obj]
+        return obj
+
+    with open(path, 'r') as f:
+        data = yaml.safe_load(f)
+    return to_ns(data)
+
+
 

@@ -21,7 +21,14 @@ from iblpt.config import (
 )
 
 
-def run_optimization(model_type, dataset_path=None, output_dir=None, workers=1):
+LOSS_PRESETS = {
+    'r_only': 1.0,
+    'compound': 0.85,
+    'balanced': 0.50,
+}
+
+
+def run_optimization(model_type, dataset_path=None, output_dir=None, workers=1, loss_preset='balanced', r_weight=None):
     """Run optimization for specified model type."""
     print(f"Running optimization for {model_type} model...")
     print(f"Using {workers} worker(s) for optimization")
@@ -33,30 +40,39 @@ def run_optimization(model_type, dataset_path=None, output_dir=None, workers=1):
         est_dataset = load_dataset(DATA_PATHS['estimation'])
     
     comp_dataset = load_dataset(DATA_PATHS['competition'])
+
+    # Resolve r_weight
+    if r_weight is None:
+        if loss_preset not in LOSS_PRESETS:
+            raise ValueError(f"Unknown loss preset: {loss_preset}")
+        r_weight = LOSS_PRESETS[loss_preset]
+    print(f"Loss weighting: R-rate={r_weight:.2f}, A-rate={1-r_weight:.2f}")
     
     if model_type == "ibl":
         callback = create_callback("IBL")
         res = fit_ibl(
             PARAMETER_BOUNDS['ibl'], 
             est_dataset, 
+            r_weight=r_weight,
             callback=callback,
             workers=workers
         )
         params = tuple(res.x)
         use_pt = False
-        label = "Optimized IBL"
+        label = f"Optimized IBL ({loss_preset})"
         
     elif model_type == "pt":
         callback = create_callback("PT")
         res = fit_pt(
             PARAMETER_BOUNDS['pt'], 
             est_dataset, 
+            r_weight=r_weight,
             callback=callback,
             workers=workers
         )
         params = tuple(res.x)
         use_pt = True
-        label = "PT-Optimized IBL"
+        label = f"PT-Optimized IBL ({loss_preset})"
         
     else:
         raise ValueError(f"Unknown model type: {model_type}")
@@ -82,6 +98,7 @@ def run_optimization(model_type, dataset_path=None, output_dir=None, workers=1):
     )
     
     return params
+
 
 
 def main():
@@ -113,12 +130,26 @@ def main():
         default=1, 
         help="Number of workers for optimization (default: 1, use -1 for all cores)"
     )
+    parser.add_argument(
+        "--loss-preset",
+        choices=list(LOSS_PRESETS.keys()),
+        default='balanced',
+        help="Loss weighting preset: r_only (100% R), compound (85/15), balanced (50/50)"
+    )
+    parser.add_argument(
+        "--r-weight",
+        type=float,
+        help="Override loss weighting for R-rate (0..1). If set, --loss-preset is ignored."
+    )
     
     args = parser.parse_args()
     
     try:
         # Run optimization
-        params = run_optimization(args.model, args.dataset, args.output_dir, args.workers)
+        params = run_optimization(
+            args.model, args.dataset, args.output_dir, args.workers,
+            loss_preset=args.loss_preset, r_weight=args.r_weight
+        )
         
         # Compare with default if requested
         if args.compare and args.model == "ibl":
